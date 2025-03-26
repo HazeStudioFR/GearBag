@@ -2,19 +2,19 @@
 
 namespace GearBag.Engine.Common.UI;
 
-internal static class UIMenu
+internal static class BaseMenu
 {
     private static readonly string MenuTitle = LSPD_First_Response.Mod.API.Functions.GetPersonaForPed(Global.PlayerPed).FullName;
 
-    internal static RAGENativeUI.UIMenu CreateMenu(string MenuSubtitle)
+    internal static UIMenu CreateMenu(string MenuSubtitle)
     {
-        var menu = new RAGENativeUI.UIMenu(MenuTitle, MenuSubtitle.ToUpper()) { MouseControlsEnabled = false, AllowCameraMovement = true, DescriptionSeparatorColor = Color.RoyalBlue };
+        var menu = new UIMenu(MenuTitle, MenuSubtitle.ToUpper()) { MouseControlsEnabled = false, AllowCameraMovement = true, DescriptionSeparatorColor = Color.RoyalBlue };
         menu.SetBannerType(new Sprite("commonmenu", "interaction_bgd", Point.Empty, Size.Empty));
         InterfaceHandler.s_menuPool.Add(menu);
         return menu;
     }
 
-    internal static UIMenuItem CreateItem(string title, string description, RAGENativeUI.UIMenu menuToAssignTo, bool sideMarkers = false)
+    internal static UIMenuItem CreateItem(string title, string description, UIMenu menuToAssignTo, bool sideMarkers = false)
     {
         var item = new UIMenuItem(title, description);
         if (sideMarkers) item.RightLabel = ">>";
@@ -23,7 +23,7 @@ internal static class UIMenu
     }
 
 
-    internal static UIMenuListScrollerItem<string> CreateStringScroller(string title, string desc, RAGENativeUI.UIMenu menu, params string[] options)
+    internal static UIMenuListScrollerItem<string> CreateStringScroller(string title, string desc, UIMenu menu, params string[] options)
     {
         var item = new UIMenuListScrollerItem<string>(title, desc, options);
         menu.AddItem(item);
@@ -31,34 +31,34 @@ internal static class UIMenu
     }
 
 
-    internal static UIMenuNumericScrollerItem<int> CreateScrollerInt(string title, string desc, int min, int max, int step, int value, RAGENativeUI.UIMenu menu)
+    internal static UIMenuNumericScrollerItem<int> CreateScrollerInt(string title, string desc, int min, int max, int step, int value, UIMenu menu)
     {
         var item = new UIMenuNumericScrollerItem<int>(title, desc, min, max, step) { Value = 0 };
         menu.AddItem(item);
         return item;
     }
 
-    internal static UIMenuCheckboxItem CreateCheckBox(string title, string desc, RAGENativeUI.UIMenu menu)
+    internal static UIMenuCheckboxItem CreateCheckBox(string title, string desc, UIMenu menu)
     {
         var item = new UIMenuCheckboxItem(title, false, desc);
         menu.AddItem(item);
         return item;
     }
 
-    internal static UIMenuNumericScrollerItem<float> CreateScrollerFloat(string title, string desc, float min, float max, float step, RAGENativeUI.UIMenu menu)
+    internal static UIMenuNumericScrollerItem<float> CreateScrollerFloat(string title, string desc, float min, float max, float step, UIMenu menu)
     {
         var item = new UIMenuNumericScrollerItem<float>(title, desc, min, max, step) { Value = 1 };
         menu.AddItem(item);
         return item;
     }
 
-    internal static RAGENativeUI.UIMenu WithFastScrollingOn(this RAGENativeUI.UIMenu menu, IEnumerable<UIMenuItem> items)
+    internal static UIMenu WithFastScrollingOn(this UIMenu menu, IEnumerable<UIMenuItem> items)
     {
         var itemsSet = new HashSet<UIMenuItem>(items);
 
-        void UpdateAcceleration(RAGENativeUI.UIMenu menu, UIMenuItem selectedItem)
+        void UpdateAcceleration(UIMenu menu, UIMenuItem selectedItem)
         {
-            var accel = itemsSet.Contains(selectedItem) ? new[] { new RAGENativeUI.UIMenu.AccelerationStep(0, 300), new RAGENativeUI.UIMenu.AccelerationStep(600, 10) } : null;
+            var accel = itemsSet.Contains(selectedItem) ? new[] { new UIMenu.AccelerationStep(0, 300), new UIMenu.AccelerationStep(600, 10) } : null;
 
             menu.SetKeyAcceleration(RAGENativeUI.Common.MenuControls.Left, accel);
             menu.SetKeyAcceleration(RAGENativeUI.Common.MenuControls.Right, accel);
@@ -76,7 +76,7 @@ internal static class UIMenu
         foreach (var a in list) scrollerItem.Items.Add(a);
     }
 
-    internal static void ItemToggleSkip(this RAGENativeUI.UIMenu menu, bool skipItems, params UIMenuItem[] items)
+    internal static void ItemToggleSkip(this UIMenu menu, bool skipItems, params UIMenuItem[] items)
     {
         foreach (var uiItem in items)
             if (skipItems)
@@ -91,7 +91,7 @@ internal static class UIMenu
             }
     }
 
-    internal static void IsMenuOpenedWithKeybind(this RAGENativeUI.UIMenu sender, bool MenuOpenedViaKeybind)
+    internal static void IsMenuOpenedWithKeybind(this UIMenu sender, bool MenuOpenedViaKeybind)
     {
         if (!MenuOpenedViaKeybind) return;
         if (sender.ParentMenu != null) sender.ParentMenu.Visible = false;

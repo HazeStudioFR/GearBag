@@ -1,9 +1,8 @@
 ﻿namespace GearBag.Engine.UI;
 
-internal static class s_vehicleMenu
+internal static class VehicleMenu
 {
-    internal static void Initalize()
+    internal static void Initialize()
     {
-        
     }
 }

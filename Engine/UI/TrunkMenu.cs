@@ -4,20 +4,20 @@ using Object = Rage.Object;
 
 namespace GearBag.Engine.UI;
 
-internal static class VehicleMenu
+internal static class TrunkMenu
 {
-    internal static UIMenu s_vehicleMenu = BaseMenu.CreateMenu("Vehicle Menu");
+    internal static UIMenu s_trunkMenu = BaseMenu.CreateMenu("Vehicle Menu");
 
-    internal static UIMenuItem s_vehicleTruckItem = BaseMenu.CreateItem("Open Trunk", "Open your vehicle's truck to access your gearbag.", s_vehicleMenu);
+    internal static UIMenuItem s_vehicleTruckItem = BaseMenu.CreateItem("Open Trunk", "Open your vehicle's truck to access your gearbag.", s_trunkMenu);
 
-    internal static UIMenuCheckboxItem s_realisticWeaponSystem = BaseMenu.CreateCheckBox("Enable Weapons System", "~b~Enable~s~ or ~b~Disable~s~ GearBag's weapon system.", s_vehicleMenu);
-    internal static UIMenuItem s_vehicleGearBag = BaseMenu.CreateItem("Grab Gear Bag", "Grab your ~b~gear bag~s~ from your car", s_vehicleMenu);
-    internal static UIMenuItem s_vehicleTrafficCones = BaseMenu.CreateItem("Grab Traffic Cones", "Grab your ~b~traffic cones~s~ from your car", s_vehicleMenu);
-    internal static UIMenuItem s_vehicleRemoveTrafficCones = BaseMenu.CreateItem("Pickup All Traffic Cones", "Pickup and remove all ~b~placed~s~ traffic cones.", s_vehicleMenu);
+    internal static UIMenuCheckboxItem s_realisticWeaponSystem = BaseMenu.CreateCheckBox("Enable Weapons System", "~b~Enable~s~ or ~b~Disable~s~ GearBag's weapon system.", s_trunkMenu);
+    internal static UIMenuItem s_vehicleGearBag = BaseMenu.CreateItem("Grab Gear Bag", "Grab your ~b~gear bag~s~ from your car", s_trunkMenu);
+    internal static UIMenuItem s_vehicleTrafficCones = BaseMenu.CreateItem("Grab Traffic Cones", "Grab your ~b~traffic cones~s~ from your car", s_trunkMenu);
+    internal static UIMenuItem s_vehicleRemoveTrafficCones = BaseMenu.CreateItem("Pickup All Traffic Cones", "Pickup and remove all ~b~placed~s~ traffic cones.", s_trunkMenu);
 
     internal static void Initialize()
     {
-        s_vehicleMenu.ResetMenu();
+        s_trunkMenu.ResetMenu();
         s_vehicleTruckItem.Activated += (sender, item) =>
         {
             if (!Global.PlayerPed.LastVehicle)
@@ -33,25 +33,30 @@ internal static class VehicleMenu
             }
 
             Global.PlayerPed.Tasks.PlayAnimation("rcmnigel3_trunk", "out_trunk_trevor", 2300, 2f, 1f, 0f, AnimationFlags.None);
-            GameFiber.Wait(1420);
+            GameFiber.Wait(999);
+            if (Settings.ENABLE_CONTROLLER_VIBRATIONS)
+            {
+                NativeFunction.Natives.x48B3886C1358D0D5(1, 500, 120);
+            }
+            GameFiber.Wait(300);
             if (Global.PlayerPed.LastVehicle.Doors[5].IsValid()) Global.PlayerPed.LastVehicle.OpenDoor(5);
             else LogHandler.Trace($"Current Vehicle [{Global.PlayerPed.LastVehicle.Model.Name}] does not have a door index of [5] / [Trunk]");
-            
-            s_vehicleMenu.ResetMenu(false);
-            s_vehicleMenu.AddItems(s_realisticWeaponSystem, s_vehicleGearBag, s_vehicleTrafficCones);
-            if (InterfaceHandler.s_trafficCones.Count > 0) s_vehicleMenu.AddItem(s_vehicleRemoveTrafficCones);
-            s_vehicleMenu.RefreshIndex();
+
+            s_trunkMenu.ResetMenu(false);
+            s_trunkMenu.AddItems(s_realisticWeaponSystem, s_vehicleGearBag, s_vehicleTrafficCones);
+            if (InterfaceHandler.s_trafficCones.Count > 0) s_trunkMenu.AddItem(s_vehicleRemoveTrafficCones);
+            s_trunkMenu.RefreshIndex();
         };
 
         s_vehicleGearBag.Activated += (sender, item) =>
         {
             Global.PlayerPed.Tasks.PlayAnimation("anim@heists@narcotics@trash", "pickup", 2800, 2f, 1f, 0f, AnimationFlags.None).WaitForCompletion();
-            
+
             if (!InterfaceHandler.s_gearBag.Exists())
             {
                 NativeFunction.Natives.SET_PED_WEAPON_MOVEMENT_CLIPSET(Global.PlayerPed, "move_ped_wpn_jerrycan_generic");
                 InterfaceHandler.s_gearBag = new Object("xm_prop_x17_bag_01d", Global.PlayerPed.Position);
-                InterfaceHandler.s_gearBag.AttachTo(Global.PlayerPed, Global.PlayerPed.GetBoneIndex(PedBoneId.RightHand), new Vector3(0.41f, -0.02f, -0.02f), new Rotator(-70.0f, -80-0f, 0.0f));
+                InterfaceHandler.s_gearBag.AttachTo(Global.PlayerPed, Global.PlayerPed.GetBoneIndex(PedBoneId.RightHand), new Vector3(0.41f, -0.02f, -0.02f), new Rotator(-70.0f, -80 - 0f, 0.0f));
                 item.Text = "Return Gear Bag";
             }
             else
@@ -62,13 +67,13 @@ internal static class VehicleMenu
                 item.Text = "Grab Gear Bag";
             }
 
-            s_vehicleMenu.Close(false);
+            s_trunkMenu.Close(false);
         };
 
         s_vehicleTrafficCones.Activated += (sender, item) =>
         {
             Global.PlayerPed.Tasks.PlayAnimation("anim@heists@narcotics@trash", "pickup", 2800, 2f, 1f, 0f, AnimationFlags.None).WaitForCompletion();
-            
+
             if (!InterfaceHandler.s_trafficCone.Exists())
             {
                 NativeFunction.Natives.SET_PED_WEAPON_MOVEMENT_CLIPSET(Global.PlayerPed, "move_ped_wpn_jerrycan_generic");
@@ -84,24 +89,23 @@ internal static class VehicleMenu
                 item.Text = "Grab Traffic Cones";
             }
 
-            s_vehicleMenu.Close(false);
+            s_trunkMenu.Close(false);
         };
 
         s_vehicleRemoveTrafficCones.Activated += (sender, item) =>
         {
             foreach (var cone in InterfaceHandler.s_trafficCones)
-            {
-                if (cone.Exists()) cone.Delete();
-            }
+                if (cone.Exists())
+                    cone.Delete();
             InterfaceHandler.s_trafficCones.Clear();
         };
-        
-        s_realisticWeaponSystem.Checked = Settings.ENABLE_REALISTIC_WEAPONS_SYSTEM;
+
+        s_realisticWeaponSystem.Checked = Settings.DISABLE_HEALTH_REGEN;
 
 
-        s_vehicleMenu.OnMenuClose += _ =>
+        s_trunkMenu.OnMenuClose += _ =>
         {
-            s_vehicleMenu.ResetMenu();
+            s_trunkMenu.ResetMenu();
             Global.PlayerPed.LastVehicle.CloseDoors();
         };
     }
